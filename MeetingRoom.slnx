@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="MeetingRoom.Application/MeetingRoom.Application.csproj" />
+  <Project Path="MeetingRoom.Domain/MeetingRoom.Domain.csproj" />
+  <Project Path="MeetingRoom.Infrastructure/MeetingRoom.Infrastructure.csproj" />
+  <Project Path="MeetingRoom.WebApi/MeetingRoom.WebApi.csproj" />
+</Solution>
