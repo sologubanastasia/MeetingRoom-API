@@ -34,7 +34,7 @@ namespace MeetingRoom.Application.Validators.Rooms
         private static bool HaveUniqueNames(List<CreateRoomOptionRequest> options)
         {
             return options
-                    .Select(option => option.Name.Trim().ToLowerInvariant())
+                    .Select(option => option.Name?.Trim().ToLowerInvariant())
                     .Distinct()
                     .Count() == options.Count;
         }
