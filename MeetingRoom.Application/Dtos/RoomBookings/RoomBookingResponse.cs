@@ -1,4 +1,5 @@
 using MeetingRoom.Domain.Entities;
+using System.Text.Json.Serialization;
 
 namespace MeetingRoom.Application.Dtos.RoomBookings
 {
@@ -50,6 +51,7 @@ namespace MeetingRoom.Application.Dtos.RoomBookings
         /// <summary>
         /// Поточний статус бронювання.
         /// </summary>
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public BookingStatus Status { get; set; }
 
         /// <summary>
