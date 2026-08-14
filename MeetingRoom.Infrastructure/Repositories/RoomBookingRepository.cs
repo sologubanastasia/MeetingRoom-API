@@ -32,7 +32,7 @@ namespace MeetingRoom.Infrastructure.Repositories
             );
         }
 
-        public new async Task<List<RoomBooking>> GetAllAsync()
+        public override async Task<List<RoomBooking>> GetAllAsync()
         {
             return await _context
                 .RoomBookings.Include(booking => booking.Room)
@@ -40,7 +40,7 @@ namespace MeetingRoom.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public new async Task<RoomBooking?> GetByIdAsync(Guid id)
+        public override async Task<RoomBooking?> GetByIdAsync(Guid id)
         {
             return await _context
                 .RoomBookings.Include(booking => booking.Room)
