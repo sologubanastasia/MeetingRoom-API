@@ -76,7 +76,10 @@ namespace MeetingRoom.Application.Services.Rooms
             room.Capacity = request.Capacity;
             room.PricePerHour = request.PricePerHour;
 
-            room.Options.Clear();
+            foreach (var existingOption in room.Options)
+            {
+                existingOption.IsActive = false;
+            }
 
             foreach (var option in request.Options)
             {
