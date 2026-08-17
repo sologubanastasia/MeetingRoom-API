@@ -13,7 +13,9 @@ namespace MeetingRoom.Application.Validators.RoomBookings
                 .NotEmpty()
                 .WithMessage("Час початку є обов'язковим")
                 .Must(startTime => startTime.Kind == DateTimeKind.Utc)
-                .WithMessage("Час початку повинен бути в UTC");
+                .WithMessage("Час початку повинен бути в UTC")
+                .Must(startTime => startTime >= DateTime.UtcNow)
+                .WithMessage("Час початку не можу бути в минулому");
 
             RuleFor(booking => booking.EndTime)
                 .NotEmpty()
