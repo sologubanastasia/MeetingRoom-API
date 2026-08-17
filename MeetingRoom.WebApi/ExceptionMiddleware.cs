@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace MeetingRoom.WebApi.Middleware
 {
@@ -62,6 +63,17 @@ namespace MeetingRoom.WebApi.Middleware
                 {
                     ArgumentException => (HttpStatusCode.BadRequest, ex.Message),
                     InvalidOperationException => (HttpStatusCode.BadRequest, ex.Message),
+                    DbUpdateException
+                        {
+                            InnerException: PostgresException
+                            {
+                                SqlState: PostgresErrorCodes.ExclusionViolation,
+                            },
+                        } =>
+                        (
+                            HttpStatusCode.Conflict,
+                            "Meeting room is already booked for this time."
+                        ),
                     DbUpdateConcurrencyException =>
                         (
                             HttpStatusCode.Conflict,

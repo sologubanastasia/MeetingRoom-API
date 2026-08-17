@@ -157,7 +157,7 @@ namespace MeetingRoom.Application.Services.RoomBooking
         {
             var booking = await _roomBookingRepository.GetByIdAsync(id);
 
-            if (booking == null)
+            if (booking == null || booking.Status == BookingStatus.Cancelled)
             {
                 return false;
             }
