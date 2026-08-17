@@ -16,6 +16,14 @@ public interface IRoomBookingRepository : IBaseRepository<RoomBooking>
     Task<List<RoomBooking>> GetByPeriodAsync(DateTime from, DateTime to);
 
     /// <summary>
+    /// Повертає активні бронювання, що перетинаються із заданим періодом.
+    /// </summary>
+    /// <param name="from">Початок періоду.</param>
+    /// <param name="to">Кінець періоду.</param>
+    /// <returns>Список активних бронювань за вказаний період.</returns>
+    Task<List<RoomBooking>> GetActiveByPeriodAsync(DateTime from, DateTime to);
+
+    /// <summary>
     /// Перевіряє наявність конфлікту бронювання для залу.
     /// </summary>
     /// <param name="roomId">Ідентифікатор залу.</param>
