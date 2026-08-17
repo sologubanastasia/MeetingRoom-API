@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<IReportService, ReportService>();
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+        services.AddAutoMapper(configuration => { }, typeof(DependencyInjection).Assembly);
 
         return services;
     }

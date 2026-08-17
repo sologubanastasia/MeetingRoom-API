@@ -1,3 +1,4 @@
+using AutoMapper;
 using MeetingRoom.Application.Dtos.RoomBookings;
 using MeetingRoom.Application.Services.Price;
 using MeetingRoom.Domain.Entities;
@@ -14,16 +15,19 @@ namespace MeetingRoom.Application.Services.RoomBooking
 
         private readonly IRoomRepository _roomRepository;
         private readonly IPriceService _priceService;
+        private readonly IMapper _mapper;
 
         public RoomBookingService(
             IRoomBookingRepository roomBookingRepository,
             IRoomRepository roomRepository,
-            IPriceService priceService
+            IPriceService priceService,
+            IMapper mapper
         )
         {
             _roomBookingRepository = roomBookingRepository;
             _roomRepository = roomRepository;
             _priceService = priceService;
+            _mapper = mapper;
         }
 
         public async Task<RoomBookingResponse> CreateRoomBookingAsync(
@@ -104,21 +108,23 @@ namespace MeetingRoom.Application.Services.RoomBooking
 
             booking.Room = room;
 
-            return MapToResponse(booking);
+            return _mapper.Map<RoomBookingResponse>(booking);
         }
 
         public async Task<List<RoomBookingResponse>> GetAllRoomBookingsAsync()
         {
             var bookings = await _roomBookingRepository.GetAllAsync();
 
-            return bookings.Select(MapToResponse).ToList();
+            return bookings
+                .Select(booking => _mapper.Map<RoomBookingResponse>(booking))
+                .ToList();
         }
 
         public async Task<RoomBookingResponse?> GetRoomBookingByIdAsync(Guid id)
         {
             var booking = await _roomBookingRepository.GetByIdAsync(id);
 
-            return booking == null ? null : MapToResponse(booking);
+            return booking == null ? null : _mapper.Map<RoomBookingResponse>(booking);
         }
 
         public async Task<bool> CancelRoomBookingAsync(Guid id)
@@ -147,37 +153,9 @@ namespace MeetingRoom.Application.Services.RoomBooking
 
             var bookings = await _roomBookingRepository.GetByPeriodAsync(from, to);
 
-            return bookings.Select(MapToResponse).ToList();
-        }
-
-        /// <summary>
-        /// Перетворює сутність бронювання у DTO відповіді.
-        /// </summary>
-        private static RoomBookingResponse MapToResponse(Domain.Entities.RoomBooking booking)
-        {
-            return new RoomBookingResponse
-            {
-                Id = booking.Id,
-                RoomId = booking.RoomId,
-                RoomName = booking.Room?.Name ?? string.Empty,
-                StartTime = booking.StartTime,
-                EndTime = booking.EndTime,
-                RoomPrice = booking.RoomPrice,
-                OptionsPrice = booking.OptionsPrice,
-                TotalPrice = booking.TotalPrice,
-                Status = booking.Status,
-                CreatedAt = booking.CreatedAt,
-
-                SelectedOptions = booking
-                    .SelectedOptions.Select(option => new BookingOptionResponse
-                    {
-                        Id = option.Id,
-                        RoomOptionId = option.RoomOptionId,
-                        OptionName = option.OptionName,
-                        OptionPrice = option.OptionPrice,
-                    })
-                    .ToList(),
-            };
+            return bookings
+                .Select(booking => _mapper.Map<RoomBookingResponse>(booking))
+                .ToList();
         }
     }
 }

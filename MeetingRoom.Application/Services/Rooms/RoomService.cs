@@ -1,3 +1,4 @@
+using AutoMapper;
 using MeetingRoom.Application.Dtos.Rooms;
 using MeetingRoom.Domain.Entities;
 using MeetingRoom.Domain.Interfaces;
@@ -10,17 +11,22 @@ namespace MeetingRoom.Application.Services.Rooms
     public class RoomService : IRoomService
     {
         private readonly IRoomRepository _roomRepository;
+        private readonly IMapper _mapper;
 
-        public RoomService(IRoomRepository roomRepository)
+        public RoomService(IRoomRepository roomRepository, IMapper mapper)
         {
             _roomRepository = roomRepository;
+            _mapper = mapper;
         }
 
         public async Task<List<RoomResponse>> GetAllRoomsAsync()
         {
             var rooms = await _roomRepository.GetAllAsync();
 
-            return rooms.Where(room => !room.IsDeleted).Select(MapToResponse).ToList();
+            return rooms
+                .Where(room => !room.IsDeleted)
+                .Select(room => _mapper.Map<RoomResponse>(room))
+                .ToList();
         }
 
         public async Task<RoomResponse?> GetRoomByIdAsync(Guid id)
@@ -32,7 +38,7 @@ namespace MeetingRoom.Application.Services.Rooms
                 return null;
             }
 
-            return MapToResponse(room);
+            return _mapper.Map<RoomResponse>(room);
         }
 
         public async Task<RoomResponse> CreateRoomAsync(CreateRoomRequest request)
@@ -60,7 +66,7 @@ namespace MeetingRoom.Application.Services.Rooms
             await _roomRepository.AddAsync(room);
             await _roomRepository.SaveChangesAsync();
 
-            return MapToResponse(room);
+            return _mapper.Map<RoomResponse>(room);
         }
 
         public async Task<RoomResponse?> UpdateRoomAsync(Guid id, UpdateRoomRequest request)
@@ -98,7 +104,7 @@ namespace MeetingRoom.Application.Services.Rooms
             _roomRepository.Update(room);
             await _roomRepository.SaveChangesAsync();
 
-            return MapToResponse(room);
+            return _mapper.Map<RoomResponse>(room);
         }
 
         public async Task<bool> DeleteRoomAsync(Guid id)
@@ -136,31 +142,7 @@ namespace MeetingRoom.Application.Services.Rooms
 
             var rooms = await _roomRepository.GetAvailableAsync(startTime, endTime, capacity);
 
-            return rooms.Select(MapToResponse).ToList();
-        }
-
-        /// <summary>
-        /// Перетворює сутність конференц-залу у DTO відповіді.
-        /// </summary>
-        private static RoomResponse MapToResponse(Room room)
-        {
-            return new RoomResponse
-            {
-                Id = room.Id,
-                Name = room.Name,
-                Capacity = room.Capacity,
-                PricePerHour = room.PricePerHour,
-
-                Options = room
-                    .Options.Where(option => option.IsActive)
-                    .Select(option => new RoomOptionResponse
-                    {
-                        Id = option.Id,
-                        Name = option.Name,
-                        Price = option.Price,
-                    })
-                    .ToList(),
-            };
+            return rooms.Select(room => _mapper.Map<RoomResponse>(room)).ToList();
         }
     }
 }
