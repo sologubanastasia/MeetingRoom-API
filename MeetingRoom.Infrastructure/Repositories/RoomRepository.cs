@@ -10,7 +10,7 @@ namespace MeetingRoom.Infrastructure.Repositories
         public RoomRepository(RoomDbContext context)
             : base(context) { }
 
-        public new async Task<List<Room>> GetAllAsync()
+        public override async Task<List<Room>> GetAllAsync()
         {
             return await _context
                 .Rooms.Include(room => room.Options)
@@ -18,7 +18,7 @@ namespace MeetingRoom.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public new async Task<Room?> GetByIdAsync(Guid id)
+        public override async Task<Room?> GetByIdAsync(Guid id)
         {
             return await _context
                 .Rooms.Include(room => room.Options)

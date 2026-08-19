@@ -46,5 +46,13 @@ namespace MeetingRoom.Application.Services.RoomBooking
         /// <param name="to">Кінець періоду.</param>
         /// <returns>Список бронювань.</returns>
         Task<List<RoomBookingResponse>> GetByPeriodAsync(DateTime from, DateTime to);
+
+        /// <summary>
+        /// Повертає активні бронювання, що перетинаються із заданим періодом.
+        /// </summary>
+        /// <param name="from">Початок періоду.</param>
+        /// <param name="to">Кінець періоду.</param>
+        /// <returns>Список активних бронювань.</returns>
+        Task<List<RoomBookingResponse>> GetActiveByPeriodAsync(DateTime from, DateTime to);
     }
 }

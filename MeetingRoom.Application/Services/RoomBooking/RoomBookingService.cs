@@ -1,3 +1,4 @@
+using AutoMapper;
 using MeetingRoom.Application.Dtos.RoomBookings;
 using MeetingRoom.Application.Services.Price;
 using MeetingRoom.Domain.Entities;
@@ -14,18 +15,33 @@ namespace MeetingRoom.Application.Services.RoomBooking
 
         private readonly IRoomRepository _roomRepository;
         private readonly IPriceService _priceService;
+        private readonly IMapper _mapper;
 
+        /// <summary>
+        /// Ініціалізує сервіс керування бронюваннями.
+        /// </summary>
+        /// <param name="roomBookingRepository">Репозиторій бронювань.</param>
+        /// <param name="roomRepository">Репозиторій конференц-залів.</param>
+        /// <param name="priceService">Сервіс розрахунку вартості.</param>
+        /// <param name="mapper">Мапер сутностей у DTO.</param>
         public RoomBookingService(
             IRoomBookingRepository roomBookingRepository,
             IRoomRepository roomRepository,
-            IPriceService priceService
+            IPriceService priceService,
+            IMapper mapper
         )
         {
             _roomBookingRepository = roomBookingRepository;
             _roomRepository = roomRepository;
             _priceService = priceService;
+            _mapper = mapper;
         }
 
+        /// <summary>
+        /// Створює нове бронювання конференц-залу.
+        /// </summary>
+        /// <param name="request">Дані нового бронювання.</param>
+        /// <returns>Створене бронювання.</returns>
         public async Task<RoomBookingResponse> CreateRoomBookingAsync(
             CreateRoomBookingRequest request
         )
@@ -104,28 +120,44 @@ namespace MeetingRoom.Application.Services.RoomBooking
 
             booking.Room = room;
 
-            return MapToResponse(booking);
+            return _mapper.Map<RoomBookingResponse>(booking);
         }
 
+        /// <summary>
+        /// Повертає всі бронювання.
+        /// </summary>
+        /// <returns>Список бронювань.</returns>
         public async Task<List<RoomBookingResponse>> GetAllRoomBookingsAsync()
         {
             var bookings = await _roomBookingRepository.GetAllAsync();
 
-            return bookings.Select(MapToResponse).ToList();
+            return bookings
+                .Select(booking => _mapper.Map<RoomBookingResponse>(booking))
+                .ToList();
         }
 
+        /// <summary>
+        /// Повертає бронювання за його ідентифікатором.
+        /// </summary>
+        /// <param name="id">Ідентифікатор бронювання.</param>
+        /// <returns>Знайдене бронювання або null.</returns>
         public async Task<RoomBookingResponse?> GetRoomBookingByIdAsync(Guid id)
         {
             var booking = await _roomBookingRepository.GetByIdAsync(id);
 
-            return booking == null ? null : MapToResponse(booking);
+            return booking == null ? null : _mapper.Map<RoomBookingResponse>(booking);
         }
 
+        /// <summary>
+        /// Скасовує бронювання за його ідентифікатором.
+        /// </summary>
+        /// <param name="id">Ідентифікатор бронювання.</param>
+        /// <returns>True, якщо бронювання скасовано; інакше false.</returns>
         public async Task<bool> CancelRoomBookingAsync(Guid id)
         {
             var booking = await _roomBookingRepository.GetByIdAsync(id);
 
-            if (booking == null)
+            if (booking == null || booking.Status == BookingStatus.Cancelled)
             {
                 return false;
             }
@@ -138,6 +170,12 @@ namespace MeetingRoom.Application.Services.RoomBooking
             return true;
         }
 
+        /// <summary>
+        /// Повертає бронювання, що перетинаються із заданим періодом.
+        /// </summary>
+        /// <param name="from">Початок періоду.</param>
+        /// <param name="to">Кінець періоду.</param>
+        /// <returns>Список бронювань за вказаний період.</returns>
         public async Task<List<RoomBookingResponse>> GetByPeriodAsync(DateTime from, DateTime to)
         {
             if (from >= to)
@@ -147,37 +185,32 @@ namespace MeetingRoom.Application.Services.RoomBooking
 
             var bookings = await _roomBookingRepository.GetByPeriodAsync(from, to);
 
-            return bookings.Select(MapToResponse).ToList();
+            return bookings
+                .Select(booking => _mapper.Map<RoomBookingResponse>(booking))
+                .ToList();
         }
 
         /// <summary>
-        /// Перетворює сутність бронювання у DTO відповіді.
+        /// Повертає активні бронювання, що перетинаються із заданим періодом.
         /// </summary>
-        private static RoomBookingResponse MapToResponse(Domain.Entities.RoomBooking booking)
+        /// <param name="from">Початок періоду.</param>
+        /// <param name="to">Кінець періоду.</param>
+        /// <returns>Список активних бронювань.</returns>
+        public async Task<List<RoomBookingResponse>> GetActiveByPeriodAsync(
+            DateTime from,
+            DateTime to
+        )
         {
-            return new RoomBookingResponse
+            if (from >= to)
             {
-                Id = booking.Id,
-                RoomId = booking.RoomId,
-                RoomName = booking.Room?.Name ?? string.Empty,
-                StartTime = booking.StartTime,
-                EndTime = booking.EndTime,
-                RoomPrice = booking.RoomPrice,
-                OptionsPrice = booking.OptionsPrice,
-                TotalPrice = booking.TotalPrice,
-                Status = booking.Status,
-                CreatedAt = booking.CreatedAt,
+                throw new ArgumentException("From date must be earlier than to date.");
+            }
 
-                SelectedOptions = booking
-                    .SelectedOptions.Select(option => new BookingOptionResponse
-                    {
-                        Id = option.Id,
-                        RoomOptionId = option.RoomOptionId,
-                        OptionName = option.OptionName,
-                        OptionPrice = option.OptionPrice,
-                    })
-                    .ToList(),
-            };
+            var bookings = await _roomBookingRepository.GetActiveByPeriodAsync(from, to);
+
+            return bookings
+                .Select(booking => _mapper.Map<RoomBookingResponse>(booking))
+                .ToList();
         }
     }
 }

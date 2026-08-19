@@ -1,6 +1,5 @@
 using MeetingRoom.Application.Dtos.Reports;
 using MeetingRoom.Application.Services.RoomBooking;
-using MeetingRoom.Domain.Entities;
 
 namespace MeetingRoom.Application.Services.Report
 {
@@ -11,18 +10,24 @@ namespace MeetingRoom.Application.Services.Report
     {
         private readonly IRoomBookingService _roomBookingService;
 
+        /// <summary>
+        /// Ініціалізує сервіс формування звітів.
+        /// </summary>
+        /// <param name="roomBookingService">Сервіс керування бронюваннями.</param>
         public ReportService(IRoomBookingService roomBookingService)
         {
             _roomBookingService = roomBookingService;
         }
 
+        /// <summary>
+        /// Формує звіт про дохід за вказаний період.
+        /// </summary>
+        /// <param name="from">Початок періоду.</param>
+        /// <param name="to">Кінець періоду.</param>
+        /// <returns>Звіт про дохід від активних бронювань.</returns>
         public async Task<RevenueReportResponse> GetRevenueReportAsync(DateTime from, DateTime to)
         {
-            var bookings = await _roomBookingService.GetByPeriodAsync(from, to);
-
-            var activeBookings = bookings
-                .Where(booking => booking.Status == BookingStatus.Active)
-                .ToList();
+            var activeBookings = await _roomBookingService.GetActiveByPeriodAsync(from, to);
 
             return new RevenueReportResponse
             {
@@ -33,15 +38,20 @@ namespace MeetingRoom.Application.Services.Report
             };
         }
 
+        /// <summary>
+        /// Формує звіт про популярність додаткових послуг за вказаний період.
+        /// </summary>
+        /// <param name="from">Початок періоду.</param>
+        /// <param name="to">Кінець періоду.</param>
+        /// <returns>Список додаткових послуг, упорядкований за популярністю.</returns>
         public async Task<List<PopularOptionReportResponse>> GetPopularOptionsReportAsync(
             DateTime from,
             DateTime to
         )
         {
-            var bookings = await _roomBookingService.GetByPeriodAsync(from, to);
+            var bookings = await _roomBookingService.GetActiveByPeriodAsync(from, to);
 
             return bookings
-                .Where(booking => booking.Status == BookingStatus.Active)
                 .SelectMany(booking => booking.SelectedOptions)
                 .GroupBy(option => option.OptionName)
                 .Select(group => new PopularOptionReportResponse
@@ -54,15 +64,20 @@ namespace MeetingRoom.Application.Services.Report
                 .ToList();
         }
 
+        /// <summary>
+        /// Формує звіт про використання конференц-залів за вказаний період.
+        /// </summary>
+        /// <param name="from">Початок періоду.</param>
+        /// <param name="to">Кінець періоду.</param>
+        /// <returns>Список показників використання конференц-залів.</returns>
         public async Task<List<RoomUsageReportResponse>> GetRoomUsageReportAsync(
             DateTime from,
             DateTime to
         )
         {
-            var bookings = await _roomBookingService.GetByPeriodAsync(from, to);
+            var bookings = await _roomBookingService.GetActiveByPeriodAsync(from, to);
 
             return bookings
-                .Where(booking => booking.Status == BookingStatus.Active)
                 .GroupBy(booking => booking.RoomName)
                 .Select(group => new RoomUsageReportResponse
                 {

@@ -11,11 +11,17 @@ namespace MeetingRoom.Application.Validators.RoomBookings
 
             RuleFor(booking => booking.StartTime)
                 .NotEmpty()
-                .WithMessage("Час початку є обов'язковим");
+                .WithMessage("Час початку є обов'язковим")
+                .Must(startTime => startTime.Kind == DateTimeKind.Utc)
+                .WithMessage("Час початку повинен бути в UTC")
+                .Must(startTime => startTime >= DateTime.UtcNow)
+                .WithMessage("Час початку не можу бути в минулому");
 
             RuleFor(booking => booking.EndTime)
                 .NotEmpty()
                 .WithMessage("Час завершення є обов'язковим")
+                .Must(endTime => endTime.Kind == DateTimeKind.Utc)
+                .WithMessage("Час завершення повинен бути в UTC")
                 .GreaterThan(booking => booking.StartTime)
                 .WithMessage("Час завершення повинен бути пізніше часу початку");
 

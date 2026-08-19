@@ -1,5 +1,6 @@
 using System.Net;
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace MeetingRoom.WebApi.Middleware
 {
@@ -9,6 +10,7 @@ namespace MeetingRoom.WebApi.Middleware
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
         /// <summary>
         /// Ініціалізує middleware обробки помилок.
@@ -16,9 +18,13 @@ namespace MeetingRoom.WebApi.Middleware
         /// <param name="next">
         /// Наступний middleware у конвеєрі HTTP-запиту.
         /// </param>
-        public ExceptionHandlingMiddleware(RequestDelegate next)
+        public ExceptionHandlingMiddleware(
+            RequestDelegate next,
+            ILogger<ExceptionHandlingMiddleware> logger
+        )
         {
             _next = next;
+            _logger = logger;
         }
 
         /// <summary>
@@ -33,22 +39,93 @@ namespace MeetingRoom.WebApi.Middleware
             {
                 await _next(context);
             }
-            catch (ArgumentException ex)
+            catch (OperationCanceledException)
+                when (context.RequestAborted.IsCancellationRequested)
             {
-                await HandleExceptionAsync(context, HttpStatusCode.BadRequest, ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                await HandleExceptionAsync(context, HttpStatusCode.BadRequest, ex.Message);
-            }
-            catch (Exception)
-            {
-                await HandleExceptionAsync(
-                    context,
-                    HttpStatusCode.InternalServerError,
-                    "Unexpected server error."
+                _logger.LogInformation(
+                    "Request {TraceId} was cancelled by the client.",
+                    context.TraceIdentifier
                 );
             }
+            catch (Exception ex)
+            {
+                if (context.Response.HasStarted)
+                {
+                    _logger.LogError(
+                        ex,
+                        "Cannot handle exception because the response has already started."
+                    );
+
+                    throw;
+                }
+
+                var (statusCode, message) = ex switch
+                {
+                    ArgumentException => (HttpStatusCode.BadRequest, ex.Message),
+                    InvalidOperationException => (HttpStatusCode.BadRequest, ex.Message),
+                    DbUpdateException
+                        {
+                            InnerException: PostgresException
+                            {
+                                SqlState: PostgresErrorCodes.ExclusionViolation,
+                            },
+                        } =>
+                        (
+                            HttpStatusCode.Conflict,
+                            "Meeting room is already booked for this time."
+                        ),
+                    DbUpdateConcurrencyException =>
+                        (
+                            HttpStatusCode.Conflict,
+                            "The resource was modified by another request."
+                        ),
+                    DbUpdateException =>
+                        (
+                            HttpStatusCode.InternalServerError,
+                            "A database error occurred."
+                        ),
+                    TimeoutException or OperationCanceledException =>
+                        (
+                            HttpStatusCode.ServiceUnavailable,
+                            "The operation timed out. Please try again later."
+                        ),
+                    _ =>
+                        (
+                            HttpStatusCode.InternalServerError,
+                            "Unexpected server error."
+                        ),
+                };
+
+                LogException(context, ex, statusCode);
+
+                await HandleExceptionAsync(context, statusCode, message);
+            }
+        }
+
+        private void LogException(
+            HttpContext context,
+            Exception exception,
+            HttpStatusCode statusCode
+        )
+        {
+            if ((int)statusCode >= 500)
+            {
+                _logger.LogError(
+                    exception,
+                    "Request {TraceId} failed with status code {StatusCode}.",
+                    context.TraceIdentifier,
+                    (int)statusCode
+                );
+
+                return;
+            }
+
+            _logger.LogWarning(
+                exception,
+                "Request {TraceId} failed with status code {StatusCode}.",
+                context.TraceIdentifier,
+                (int)statusCode
+            );
         }
 
         /// <summary>
@@ -64,14 +141,16 @@ namespace MeetingRoom.WebApi.Middleware
             string message
         )
         {
-            context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)statusCode;
 
-            var response = new { statusCode = context.Response.StatusCode, message };
+            var response = new
+            {
+                statusCode = context.Response.StatusCode,
+                message,
+                traceId = context.TraceIdentifier,
+            };
 
-            var json = JsonSerializer.Serialize(response);
-
-            await context.Response.WriteAsync(json);
+            await context.Response.WriteAsJsonAsync(response);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace MeetingRoom.WebApi.Controllers
         {
             var booking = await _service.CreateRoomBookingAsync(request);
 
-            return Ok(booking);
+            return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
         }
 
         /// <summary>
