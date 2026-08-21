@@ -34,6 +34,11 @@ namespace MeetingRoom.Application.Validators.RoomBookings
                 .WithMessage("ID послуги не може бути порожнім");
 
             RuleFor(booking => booking.SelectedOptionIds)
+                .Must(ids => ids.Count <= 3)
+                .WithMessage("Можливо обрати не більше трьох додаткових послуг")
+                .When(booking => booking.SelectedOptionIds is not null);
+
+            RuleFor(booking => booking.SelectedOptionIds)
                 .Must(HaveUniqueIds)
                 .WithMessage("ID послуг не повинні повторюватися")
                 .When(booking => booking.SelectedOptionIds is not null);

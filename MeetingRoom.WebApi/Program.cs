@@ -2,7 +2,6 @@ using FluentValidation.AspNetCore;
 using MeetingRoom.Application;
 using MeetingRoom.Infrastructure;
 using MeetingRoom.WebApi.Middleware;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 

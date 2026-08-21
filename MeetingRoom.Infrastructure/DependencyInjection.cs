@@ -1,7 +1,6 @@
 using MeetingRoom.Domain.Interfaces;
 using MeetingRoom.Infrastructure;
 using MeetingRoom.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

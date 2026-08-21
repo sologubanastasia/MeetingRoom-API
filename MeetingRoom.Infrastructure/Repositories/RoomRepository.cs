@@ -1,7 +1,6 @@
 using MeetingRoom.Domain.Entities;
 using MeetingRoom.Domain.Interfaces;
 using MeetingRoom.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 
 namespace MeetingRoom.Infrastructure.Repositories
 {

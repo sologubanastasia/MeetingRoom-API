@@ -91,3 +91,9 @@ yarn-error.log*
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+.dockerignore
+DOCKER.md
+Dockerfile
+compose.yaml
+repair-docker.ps1
