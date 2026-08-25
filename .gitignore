@@ -15,13 +15,6 @@ artifacts/
 *.sln.docstates
 *.rsuser
 
-# VS Code
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
-!.vscode/tasks.json
-
 # Local history
 .history/
 **/.history/
@@ -64,6 +57,7 @@ publish/
 !.env.example
 appsettings.Local.json
 appsettings.Development.local.json
+Abp.MeetingRoom.Services.Web/appsettings.Development.json
 secrets.json
 
 # Logs and temporary files
@@ -77,9 +71,6 @@ secrets.json
 *.swo
 ~$*
 
-# Docker local overrides
-docker-compose.override.yml
-
 # Node tooling, if used
 node_modules/
 npm-debug.log*
@@ -91,9 +82,3 @@ yarn-error.log*
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
-
-.dockerignore
-DOCKER.md
-Dockerfile
-compose.yaml
-repair-docker.ps1

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Abp.MeetingRoom.Bll.Common/Abp.MeetingRoom.Bll.Common.csproj" />
+  <Project Path="Abp.MeetingRoom.Bll/Abp.MeetingRoom.Bll.csproj" />
+  <Project Path="Abp.MeetingRoom.Dal.SqlRepositories/Abp.MeetingRoom.Dal.SqlRepositories.csproj" />
+  <Project Path="Abp.MeetingRoom.Services.Web/Abp.MeetingRoom.Services.Web.csproj" />
+</Solution>
