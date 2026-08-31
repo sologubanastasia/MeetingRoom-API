@@ -4,10 +4,13 @@ using Microsoft.Data.SqlClient;
 namespace Abp.MeetingRoom.Dal.SqlRepositories.Rooms.Mappings;
 internal static class RoomDataMapper
 {
-    public static async Task<List<Room>> ReadAsync(SqlDataReader reader)
+    public static async Task<List<Room>> ReadAsync(
+        SqlDataReader reader,
+        CancellationToken cancellationToken
+    )
     {
         var entities = new Dictionary<Guid, RoomEntity>();
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(cancellationToken))
         {
             var roomId = reader.GetGuid(reader.GetOrdinal("Id"));
             if (!entities.TryGetValue(roomId, out var room))

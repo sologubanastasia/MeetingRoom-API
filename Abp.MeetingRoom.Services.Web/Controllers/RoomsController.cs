@@ -32,9 +32,9 @@ public class RoomsController : ControllerBase
     /// </summary>
     /// <returns>HTTP-відповідь зі списком конференц-залів.</returns>
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var rooms = await _roomManager.GetAllRoomsAsync();
+        var rooms = await _roomManager.GetAllRoomsAsync(cancellationToken);
         return Ok(_mapper.Map<List<RoomResponse>>(rooms));
     }
 
@@ -44,9 +44,9 @@ public class RoomsController : ControllerBase
     /// <param name="id">Унікальний ідентифікатор залу.</param>
     /// <returns>HTTP-відповідь із залом або статусом 404, якщо зал не знайдено.</returns>
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var room = await _roomManager.GetRoomByIdAsync(id);
+        var room = await _roomManager.GetRoomByIdAsync(id, cancellationToken);
 
         if (room == null)
         {
@@ -67,10 +67,16 @@ public class RoomsController : ControllerBase
     public async Task<IActionResult> GetAvailable(
         [FromQuery] DateTime startTime,
         [FromQuery] DateTime endTime,
-        [FromQuery] int capacity
+        [FromQuery] int capacity,
+        CancellationToken cancellationToken
     )
     {
-        var rooms = await _roomManager.GetAvailableRoomsAsync(startTime, endTime, capacity);
+        var rooms = await _roomManager.GetAvailableRoomsAsync(
+            startTime,
+            endTime,
+            capacity,
+            cancellationToken
+        );
         return Ok(_mapper.Map<List<RoomResponse>>(rooms));
     }
 
@@ -80,10 +86,13 @@ public class RoomsController : ControllerBase
     /// <param name="request">Дані нового конференц-залу.</param>
     /// <returns>HTTP-відповідь зі створеним залом і адресою ресурсу.</returns>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateRoomRequest request)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateRoomRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var model = _mapper.Map<Room>(request);
-        var room = await _roomManager.CreateRoomAsync(model);
+        var room = await _roomManager.CreateRoomAsync(model, cancellationToken);
         var response = _mapper.Map<RoomResponse>(room);
 
         return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
@@ -96,10 +105,14 @@ public class RoomsController : ControllerBase
     /// <param name="request">Актуальні дані конференц-залу.</param>
     /// <returns>HTTP-відповідь з оновленим залом або статусом 404.</returns>
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRoomRequest request)
+    public async Task<IActionResult> Update(
+        Guid id,
+        [FromBody] UpdateRoomRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var model = _mapper.Map<Room>(request, options => options.Items["RoomId"] = id);
-        var room = await _roomManager.UpdateRoomAsync(model);
+        var room = await _roomManager.UpdateRoomAsync(model, cancellationToken);
 
         if (room == null)
         {
@@ -115,9 +128,9 @@ public class RoomsController : ControllerBase
     /// <param name="id">Унікальний ідентифікатор залу.</param>
     /// <returns>HTTP-відповідь зі статусом 204 або 404, якщо зал не знайдено.</returns>
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _roomManager.DeleteRoomAsync(id);
+        var result = await _roomManager.DeleteRoomAsync(id, cancellationToken);
 
         if (!result)
         {

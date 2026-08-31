@@ -35,10 +35,15 @@ public class ReportsController : ControllerBase
     [HttpGet("revenue")]
     public async Task<IActionResult> GetRevenue(
         [FromQuery] DateTime from,
-        [FromQuery] DateTime to
+        [FromQuery] DateTime to,
+        CancellationToken cancellationToken
     )
     {
-        var report = await _reportManager.GetRevenueReportAsync(from, to);
+        var report = await _reportManager.GetRevenueReportAsync(
+            from,
+            to,
+            cancellationToken
+        );
         return Ok(_mapper.Map<RevenueReportResponse>(report));
     }
 
@@ -51,10 +56,15 @@ public class ReportsController : ControllerBase
     [HttpGet("popular-options")]
     public async Task<IActionResult> GetPopularOptions(
         [FromQuery] DateTime from,
-        [FromQuery] DateTime to
+        [FromQuery] DateTime to,
+        CancellationToken cancellationToken
     )
     {
-        var report = await _reportManager.GetPopularOptionsReportAsync(from, to);
+        var report = await _reportManager.GetPopularOptionsReportAsync(
+            from,
+            to,
+            cancellationToken
+        );
         return Ok(_mapper.Map<List<PopularOptionReportResponse>>(report));
     }
 
@@ -67,10 +77,15 @@ public class ReportsController : ControllerBase
     [HttpGet("room-usage")]
     public async Task<IActionResult> GetRoomUsage(
         [FromQuery] DateTime from,
-        [FromQuery] DateTime to
+        [FromQuery] DateTime to,
+        CancellationToken cancellationToken
     )
     {
-        var report = await _reportManager.GetRoomUsageReportAsync(from, to);
+        var report = await _reportManager.GetRoomUsageReportAsync(
+            from,
+            to,
+            cancellationToken
+        );
         return Ok(_mapper.Map<List<RoomUsageReportResponse>>(report));
     }
 }
