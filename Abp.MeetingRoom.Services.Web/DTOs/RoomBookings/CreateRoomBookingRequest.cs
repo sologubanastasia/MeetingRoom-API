@@ -1,4 +1,4 @@
-namespace Abp.MeetingRoom.Services.Web.RoomBookings.Dtos
+namespace Abp.MeetingRoom.Services.Web.DTOs.RoomBookings
 {
     public class CreateRoomBookingRequest
     {

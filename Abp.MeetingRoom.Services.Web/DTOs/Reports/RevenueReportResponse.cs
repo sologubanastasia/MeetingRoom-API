@@ -1,4 +1,4 @@
-namespace Abp.MeetingRoom.Services.Web.Reports.Dtos
+namespace Abp.MeetingRoom.Services.Web.DTOs.Reports
 {
     public class RevenueReportResponse
     {

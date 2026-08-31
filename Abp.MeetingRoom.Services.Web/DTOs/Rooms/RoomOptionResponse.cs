@@ -1,4 +1,4 @@
-namespace Abp.MeetingRoom.Services.Web.Rooms.Dtos
+namespace Abp.MeetingRoom.Services.Web.DTOs.Rooms
 {
     public class RoomOptionResponse
     {

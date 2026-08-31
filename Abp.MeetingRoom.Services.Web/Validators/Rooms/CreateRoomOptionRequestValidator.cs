@@ -1,6 +1,6 @@
 using FluentValidation;
-using Abp.MeetingRoom.Services.Web.Rooms.Dtos;
-namespace Abp.MeetingRoom.Services.Web.Rooms.Validators
+using Abp.MeetingRoom.Services.Web.DTOs.Rooms;
+namespace Abp.MeetingRoom.Services.Web.Validators.Rooms
 {
     public class CreateRoomOptionRequestValidator : AbstractValidator<CreateRoomOptionRequest>
     {
