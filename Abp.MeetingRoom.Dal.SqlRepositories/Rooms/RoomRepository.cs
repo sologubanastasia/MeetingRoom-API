@@ -2,7 +2,6 @@ using System.Data;
 using Abp.MeetingRoom.Bll.Common.Rooms;
 using Abp.MeetingRoom.Bll.Common.Rooms.Models;
 using Abp.MeetingRoom.Dal.SqlRepositories.Database;
-using Abp.MeetingRoom.Dal.SqlRepositories.Database.Mappings;
 using Abp.MeetingRoom.Dal.SqlRepositories.Rooms.Formatters;
 using Abp.MeetingRoom.Dal.SqlRepositories.Rooms.Mappings;
 using Microsoft.Data.SqlClient;
@@ -59,7 +58,7 @@ internal sealed class RoomRepository : IRoomRepository
     }
     public async Task<bool> SoftDeleteAsync(Guid id)
     {
-        return await SqlExceptionTranslator.ExecuteAsync(async () =>
+        return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
             await using var connection = new SqlConnection(_connectionString);
             await using var command = CreateCommand(
@@ -76,7 +75,7 @@ internal sealed class RoomRepository : IRoomRepository
         Action<SqlCommand>? configure = null
     )
     {
-        return await SqlExceptionTranslator.ExecuteAsync(async () =>
+        return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
             await using var connection = new SqlConnection(_connectionString);
             await using var command = CreateCommand(connection, procedure);

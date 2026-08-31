@@ -1,24 +1,15 @@
 using Abp.MeetingRoom.Bll.Common.RoomBookings.Exceptions;
 using Abp.MeetingRoom.Bll.Common.Shared.Exceptions;
-using Abp.MeetingRoom.Dal.SqlRepositories.Database.Exceptions;
 using Microsoft.Data.SqlClient;
-namespace Abp.MeetingRoom.Dal.SqlRepositories.Database.Mappings;
+
+namespace Abp.MeetingRoom.Dal.SqlRepositories.Database.Exceptions;
+
 internal static class SqlExceptionTranslator
 {
-    public static async Task<T> ExecuteAsync<T>(Func<Task<T>> operation)
-    {
-        try
-        {
-            return await operation();
-        }
-        catch (SqlException exception)
-        {
-            throw Translate(exception);
-        }
-    }
-    private static Exception Translate(SqlException exception)
+    public static Exception Translate(SqlException exception)
     {
         var diagnosticDetails = $"SQL error {exception.Number}: {exception.Message}";
+
         return exception.Number switch
         {
             50010 or 50204 => new BookingConflictException(exception),

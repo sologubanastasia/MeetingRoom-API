@@ -3,7 +3,6 @@ using Abp.MeetingRoom.Bll.Common.Reports;
 using Abp.MeetingRoom.Bll.Common.Reports.Models;
 using Abp.MeetingRoom.Dal.SqlRepositories.Database;
 using Abp.MeetingRoom.Dal.SqlRepositories.Database.Exceptions;
-using Abp.MeetingRoom.Dal.SqlRepositories.Database.Mappings;
 using Abp.MeetingRoom.Dal.SqlRepositories.Reports.Mappings;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +19,7 @@ internal sealed class ReportRepository : IReportRepository
     }
     public async Task<RevenueReport> GetRevenueAsync(DateTime from, DateTime to)
     {
-        return await SqlExceptionTranslator.ExecuteAsync(async () =>
+        return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
             await using var connection = new SqlConnection(_connectionString);
             await using var command = CreateReportCommand(
@@ -48,7 +47,7 @@ internal sealed class ReportRepository : IReportRepository
         DateTime to
     )
     {
-        return await SqlExceptionTranslator.ExecuteAsync(async () =>
+        return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
             await using var connection = new SqlConnection(_connectionString);
             await using var command = CreateReportCommand(
@@ -64,7 +63,7 @@ internal sealed class ReportRepository : IReportRepository
     }
     public async Task<List<RoomUsageReport>> GetRoomUsageAsync(DateTime from, DateTime to)
     {
-        return await SqlExceptionTranslator.ExecuteAsync(async () =>
+        return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
             await using var connection = new SqlConnection(_connectionString);
             await using var command = CreateReportCommand(

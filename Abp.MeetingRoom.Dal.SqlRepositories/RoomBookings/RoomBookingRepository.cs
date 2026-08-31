@@ -2,7 +2,6 @@ using System.Data;
 using Abp.MeetingRoom.Bll.Common.RoomBookings;
 using Abp.MeetingRoom.Bll.Common.RoomBookings.Models;
 using Abp.MeetingRoom.Dal.SqlRepositories.Database;
-using Abp.MeetingRoom.Dal.SqlRepositories.Database.Mappings;
 using Abp.MeetingRoom.Dal.SqlRepositories.RoomBookings.Formatters;
 using Abp.MeetingRoom.Dal.SqlRepositories.RoomBookings.Mappings;
 using Microsoft.Data.SqlClient;
@@ -31,7 +30,7 @@ internal sealed class RoomBookingRepository : IRoomBookingRepository
         IReadOnlyCollection<Guid> selectedOptionIds
     )
     {
-        return await SqlExceptionTranslator.ExecuteAsync(async () =>
+        return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
             await using var connection = new SqlConnection(_connectionString);
             await using var command = CreateCommand(
@@ -49,7 +48,7 @@ internal sealed class RoomBookingRepository : IRoomBookingRepository
     }
     public async Task<bool> CancelAsync(Guid id)
     {
-        return await SqlExceptionTranslator.ExecuteAsync(async () =>
+        return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
             await using var connection = new SqlConnection(_connectionString);
             await using var command = CreateCommand(
@@ -76,7 +75,7 @@ internal sealed class RoomBookingRepository : IRoomBookingRepository
         BookingStatus? status = null
     )
     {
-        return await SqlExceptionTranslator.ExecuteAsync(async () =>
+        return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
             await using var connection = new SqlConnection(_connectionString);
             var procedure = id.HasValue
