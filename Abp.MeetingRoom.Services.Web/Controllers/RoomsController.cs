@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Abp.MeetingRoom.Services.Web.Controllers;
 
+/// <summary>
+/// Надає HTTP-операції для керування конференц-залами.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class RoomsController : ControllerBase
@@ -13,12 +16,21 @@ public class RoomsController : ControllerBase
     private readonly IRoomManager _roomManager;
     private readonly IMapper _mapper;
 
+    /// <summary>
+    /// Ініціалізує новий екземпляр контролера конференц-залів.
+    /// </summary>
+    /// <param name="roomManager">Менеджер бізнес-операцій конференц-залів.</param>
+    /// <param name="mapper">Мапер між моделями бізнес-рівня та DTO.</param>
     public RoomsController(IRoomManager roomManager, IMapper mapper)
     {
         _roomManager = roomManager;
         _mapper = mapper;
     }
 
+    /// <summary>
+    /// Отримує всі активні конференц-зали.
+    /// </summary>
+    /// <returns>HTTP-відповідь зі списком конференц-залів.</returns>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -26,6 +38,11 @@ public class RoomsController : ControllerBase
         return Ok(_mapper.Map<List<RoomResponse>>(rooms));
     }
 
+    /// <summary>
+    /// Отримує конференц-зал за його ідентифікатором.
+    /// </summary>
+    /// <param name="id">Унікальний ідентифікатор залу.</param>
+    /// <returns>HTTP-відповідь із залом або статусом 404, якщо зал не знайдено.</returns>
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -39,6 +56,13 @@ public class RoomsController : ControllerBase
         return Ok(_mapper.Map<RoomResponse>(room));
     }
 
+    /// <summary>
+    /// Отримує зали, доступні для бронювання у вказаний період.
+    /// </summary>
+    /// <param name="startTime">Дата й час початку періоду в UTC.</param>
+    /// <param name="endTime">Дата й час завершення періоду в UTC.</param>
+    /// <param name="capacity">Мінімальна необхідна місткість залу.</param>
+    /// <returns>HTTP-відповідь зі списком доступних конференц-залів.</returns>
     [HttpGet("available")]
     public async Task<IActionResult> GetAvailable(
         [FromQuery] DateTime startTime,
@@ -50,6 +74,11 @@ public class RoomsController : ControllerBase
         return Ok(_mapper.Map<List<RoomResponse>>(rooms));
     }
 
+    /// <summary>
+    /// Створює новий конференц-зал.
+    /// </summary>
+    /// <param name="request">Дані нового конференц-залу.</param>
+    /// <returns>HTTP-відповідь зі створеним залом і адресою ресурсу.</returns>
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateRoomRequest request)
     {
@@ -60,6 +89,12 @@ public class RoomsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
     }
 
+    /// <summary>
+    /// Оновлює наявний конференц-зал.
+    /// </summary>
+    /// <param name="id">Унікальний ідентифікатор залу.</param>
+    /// <param name="request">Актуальні дані конференц-залу.</param>
+    /// <returns>HTTP-відповідь з оновленим залом або статусом 404.</returns>
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRoomRequest request)
     {
@@ -74,6 +109,11 @@ public class RoomsController : ControllerBase
         return Ok(_mapper.Map<RoomResponse>(room));
     }
 
+    /// <summary>
+    /// Виконує логічне видалення конференц-залу.
+    /// </summary>
+    /// <param name="id">Унікальний ідентифікатор залу.</param>
+    /// <returns>HTTP-відповідь зі статусом 204 або 404, якщо зал не знайдено.</returns>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
