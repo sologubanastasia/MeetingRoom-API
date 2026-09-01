@@ -33,10 +33,16 @@ public class RoomBookingsController : ControllerBase
     /// <param name="request">Дані нового бронювання.</param>
     /// <returns>HTTP-відповідь зі створеним бронюванням і адресою ресурсу.</returns>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateRoomBookingRequest request)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateRoomBookingRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var model = _mapper.Map<RoomBooking>(request);
-        var booking = await _roomBookingManager.CreateRoomBookingAsync(model);
+        var booking = await _roomBookingManager.CreateRoomBookingAsync(
+            model,
+            cancellationToken
+        );
         var response = _mapper.Map<RoomBookingResponse>(booking);
 
         return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
@@ -47,9 +53,9 @@ public class RoomBookingsController : ControllerBase
     /// </summary>
     /// <returns>HTTP-відповідь зі списком бронювань.</returns>
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var bookings = await _roomBookingManager.GetAllRoomBookingsAsync();
+        var bookings = await _roomBookingManager.GetAllRoomBookingsAsync(cancellationToken);
         return Ok(_mapper.Map<List<RoomBookingResponse>>(bookings));
     }
 
@@ -59,9 +65,12 @@ public class RoomBookingsController : ControllerBase
     /// <param name="id">Унікальний ідентифікатор бронювання.</param>
     /// <returns>HTTP-відповідь із бронюванням або статусом 404.</returns>
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var booking = await _roomBookingManager.GetRoomBookingByIdAsync(id);
+        var booking = await _roomBookingManager.GetRoomBookingByIdAsync(
+            id,
+            cancellationToken
+        );
 
         if (booking == null)
         {
@@ -77,9 +86,12 @@ public class RoomBookingsController : ControllerBase
     /// <param name="id">Унікальний ідентифікатор бронювання.</param>
     /// <returns>HTTP-відповідь зі статусом 204 або 404, якщо бронювання не знайдено.</returns>
     [HttpPatch("{id:guid}/cancel")]
-    public async Task<IActionResult> Cancel(Guid id)
+    public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _roomBookingManager.CancelRoomBookingAsync(id);
+        var result = await _roomBookingManager.CancelRoomBookingAsync(
+            id,
+            cancellationToken
+        );
 
         if (!result)
         {

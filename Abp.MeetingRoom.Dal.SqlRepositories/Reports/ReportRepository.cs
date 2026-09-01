@@ -17,7 +17,11 @@ internal sealed class ReportRepository : IReportRepository
                 "Connection string 'DefaultConnection' is not configured."
             );
     }
-    public async Task<RevenueReport> GetRevenueAsync(DateTime from, DateTime to)
+    public async Task<RevenueReport> GetRevenueAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    )
     {
         return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
@@ -28,11 +32,12 @@ internal sealed class ReportRepository : IReportRepository
                 from,
                 to
             );
-            await connection.OpenAsync();
+            await connection.OpenAsync(cancellationToken);
             await using var reader = await command.ExecuteReaderAsync(
-                CommandBehavior.SingleRow
+                CommandBehavior.SingleRow,
+                cancellationToken
             );
-            if (!await reader.ReadAsync())
+            if (!await reader.ReadAsync(cancellationToken))
             {
                 throw new DatabaseOperationException(
                     "A database error occurred.",
@@ -44,7 +49,8 @@ internal sealed class ReportRepository : IReportRepository
     }
     public async Task<List<PopularOptionReport>> GetPopularOptionsAsync(
         DateTime from,
-        DateTime to
+        DateTime to,
+        CancellationToken cancellationToken
     )
     {
         return await SqlOperationExecutor.ExecuteAsync(async () =>
@@ -56,12 +62,16 @@ internal sealed class ReportRepository : IReportRepository
                 from,
                 to
             );
-            await connection.OpenAsync();
-            await using var reader = await command.ExecuteReaderAsync();
-            return await ReportMapper.ReadPopularOptionsAsync(reader);
+            await connection.OpenAsync(cancellationToken);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            return await ReportMapper.ReadPopularOptionsAsync(reader, cancellationToken);
         });
     }
-    public async Task<List<RoomUsageReport>> GetRoomUsageAsync(DateTime from, DateTime to)
+    public async Task<List<RoomUsageReport>> GetRoomUsageAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    )
     {
         return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
@@ -72,9 +82,9 @@ internal sealed class ReportRepository : IReportRepository
                 from,
                 to
             );
-            await connection.OpenAsync();
-            await using var reader = await command.ExecuteReaderAsync();
-            return await ReportMapper.ReadRoomUsageAsync(reader);
+            await connection.OpenAsync(cancellationToken);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            return await ReportMapper.ReadRoomUsageAsync(reader, cancellationToken);
         });
     }
     private static SqlCommand CreateReportCommand(

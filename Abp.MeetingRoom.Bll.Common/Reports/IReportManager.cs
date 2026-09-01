@@ -13,7 +13,11 @@ public interface IReportManager
     /// <param name="from">Початок звітного періоду в UTC.</param>
     /// <param name="to">Завершення звітного періоду в UTC.</param>
     /// <returns>Зведений звіт про дохід.</returns>
-    Task<RevenueReport> GetRevenueReportAsync(DateTime from, DateTime to);
+    Task<RevenueReport> GetRevenueReportAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
     /// Формує звіт про популярність додаткових послуг за вказаний період.
@@ -23,7 +27,8 @@ public interface IReportManager
     /// <returns>Колекція показників використання додаткових послуг.</returns>
     Task<IReadOnlyList<PopularOptionReport>> GetPopularOptionsReportAsync(
         DateTime from,
-        DateTime to
+        DateTime to,
+        CancellationToken cancellationToken
     );
 
     /// <summary>
@@ -32,5 +37,9 @@ public interface IReportManager
     /// <param name="from">Початок звітного періоду в UTC.</param>
     /// <param name="to">Завершення звітного періоду в UTC.</param>
     /// <returns>Колекція показників використання конференц-залів.</returns>
-    Task<IReadOnlyList<RoomUsageReport>> GetRoomUsageReportAsync(DateTime from, DateTime to);
+    Task<IReadOnlyList<RoomUsageReport>> GetRoomUsageReportAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    );
 }
