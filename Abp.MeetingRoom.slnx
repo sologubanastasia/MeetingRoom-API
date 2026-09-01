@@ -3,4 +3,5 @@
   <Project Path="Abp.MeetingRoom.Bll/Abp.MeetingRoom.Bll.csproj" />
   <Project Path="Abp.MeetingRoom.Dal.SqlRepositories/Abp.MeetingRoom.Dal.SqlRepositories.csproj" />
   <Project Path="Abp.MeetingRoom.Services.Web/Abp.MeetingRoom.Services.Web.csproj" />
+  <Project Path="WebApi.LoadTesting/WebApi.LoadTesting.csproj" />
 </Solution>
