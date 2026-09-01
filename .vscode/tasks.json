@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build MeetingRoom API",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/Abp.MeetingRoom.Services.Web/Abp.MeetingRoom.Services.Web.csproj",
+        "--no-restore"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
