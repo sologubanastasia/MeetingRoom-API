@@ -17,17 +17,19 @@ internal sealed class RoomBookingRepository : IRoomBookingRepository
                 "Connection string 'DefaultConnection' is not configured."
             );
     }
-    public Task<List<RoomBooking>> GetAllAsync() => QueryBookingsAsync();
-    public async Task<RoomBooking?> GetByIdAsync(Guid id)
+    public Task<List<RoomBooking>> GetAllAsync(CancellationToken cancellationToken) =>
+        QueryBookingsAsync(cancellationToken);
+    public async Task<RoomBooking?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var bookings = await QueryBookingsAsync(id);
+        var bookings = await QueryBookingsAsync(cancellationToken, id);
         return bookings.SingleOrDefault();
     }
     public async Task<RoomBooking> CreateAsync(
         Guid roomId,
         DateTime startTime,
         DateTime endTime,
-        IReadOnlyCollection<Guid> selectedOptionIds
+        IReadOnlyCollection<Guid> selectedOptionIds,
+        CancellationToken cancellationToken
     )
     {
         return await SqlOperationExecutor.ExecuteAsync(async () =>
@@ -41,12 +43,12 @@ internal sealed class RoomBookingRepository : IRoomBookingRepository
             AddDateTime2Parameter(command, "@StartTime", startTime);
             AddDateTime2Parameter(command, "@EndTime", endTime);
             AddSelectedOptionIds(command, selectedOptionIds);
-            await connection.OpenAsync();
-            await using var reader = await command.ExecuteReaderAsync();
-            return (await RoomBookingDataMapper.ReadAsync(reader)).Single();
+            await connection.OpenAsync(cancellationToken);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            return (await RoomBookingDataMapper.ReadAsync(reader, cancellationToken)).Single();
         });
     }
-    public async Task<bool> CancelAsync(Guid id)
+    public async Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken)
     {
         return await SqlOperationExecutor.ExecuteAsync(async () =>
         {
@@ -56,19 +58,33 @@ internal sealed class RoomBookingRepository : IRoomBookingRepository
                 SqlObjectNames.RoomBookings.Cancel
             );
             command.Parameters.Add("@BookingId", SqlDbType.UniqueIdentifier).Value = id;
-            await connection.OpenAsync();
-            return Convert.ToInt32(await command.ExecuteScalarAsync()) == 1;
+            await connection.OpenAsync(cancellationToken);
+            return Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken)) == 1;
         });
     }
-    public Task<List<RoomBooking>> GetByPeriodAsync(DateTime from, DateTime to)
+    public Task<List<RoomBooking>> GetByPeriodAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    )
     {
-        return QueryBookingsAsync(from: from, to: to);
+        return QueryBookingsAsync(cancellationToken, from: from, to: to);
     }
-    public Task<List<RoomBooking>> GetActiveByPeriodAsync(DateTime from, DateTime to)
+    public Task<List<RoomBooking>> GetActiveByPeriodAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    )
     {
-        return QueryBookingsAsync(from: from, to: to, status: BookingStatus.Active);
+        return QueryBookingsAsync(
+            cancellationToken,
+            from: from,
+            to: to,
+            status: BookingStatus.Active
+        );
     }
     private async Task<List<RoomBooking>> QueryBookingsAsync(
+        CancellationToken cancellationToken,
         Guid? id = null,
         DateTime? from = null,
         DateTime? to = null,
@@ -94,9 +110,9 @@ internal sealed class RoomBookingRepository : IRoomBookingRepository
                 command.Parameters.Add("@Status", SqlDbType.Int).Value =
                     status.HasValue ? (object)(int)status.Value : DBNull.Value;
             }
-            await connection.OpenAsync();
-            await using var reader = await command.ExecuteReaderAsync();
-            return await RoomBookingDataMapper.ReadAsync(reader);
+            await connection.OpenAsync(cancellationToken);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            return await RoomBookingDataMapper.ReadAsync(reader, cancellationToken);
         });
     }
     private static SqlCommand CreateCommand(SqlConnection connection, string procedure)

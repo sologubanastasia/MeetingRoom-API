@@ -12,27 +12,35 @@ public interface IRoomBookingManager
     /// </summary>
     /// <param name="booking">Дані нового бронювання.</param>
     /// <returns>Створене бронювання з розрахованою вартістю.</returns>
-    Task<RoomBooking> CreateRoomBookingAsync(RoomBooking booking);
+    Task<RoomBooking> CreateRoomBookingAsync(
+        RoomBooking booking,
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
     /// Отримує всі бронювання конференц-залів.
     /// </summary>
     /// <returns>Колекція бронювань.</returns>
-    Task<IReadOnlyList<RoomBooking>> GetAllRoomBookingsAsync();
+    Task<IReadOnlyList<RoomBooking>> GetAllRoomBookingsAsync(
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
     /// Отримує бронювання за його ідентифікатором.
     /// </summary>
     /// <param name="id">Унікальний ідентифікатор бронювання.</param>
     /// <returns>Знайдене бронювання або <see langword="null" />, якщо воно не існує.</returns>
-    Task<RoomBooking?> GetRoomBookingByIdAsync(Guid id);
+    Task<RoomBooking?> GetRoomBookingByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
     /// Скасовує бронювання конференц-залу.
     /// </summary>
     /// <param name="id">Унікальний ідентифікатор бронювання.</param>
     /// <returns><see langword="true" />, якщо бронювання скасовано; інакше — <see langword="false" />.</returns>
-    Task<bool> CancelRoomBookingAsync(Guid id);
+    Task<bool> CancelRoomBookingAsync(Guid id, CancellationToken cancellationToken);
 
     /// <summary>
     /// Отримує бронювання за вказаний період.
@@ -40,7 +48,11 @@ public interface IRoomBookingManager
     /// <param name="from">Початок періоду в UTC.</param>
     /// <param name="to">Завершення періоду в UTC.</param>
     /// <returns>Колекція бронювань за період.</returns>
-    Task<IReadOnlyList<RoomBooking>> GetByPeriodAsync(DateTime from, DateTime to);
+    Task<IReadOnlyList<RoomBooking>> GetByPeriodAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    );
 
     /// <summary>
     /// Отримує активні бронювання за вказаний період.
@@ -48,5 +60,9 @@ public interface IRoomBookingManager
     /// <param name="from">Початок періоду в UTC.</param>
     /// <param name="to">Завершення періоду в UTC.</param>
     /// <returns>Колекція активних бронювань за період.</returns>
-    Task<IReadOnlyList<RoomBooking>> GetActiveByPeriodAsync(DateTime from, DateTime to);
+    Task<IReadOnlyList<RoomBooking>> GetActiveByPeriodAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    );
 }

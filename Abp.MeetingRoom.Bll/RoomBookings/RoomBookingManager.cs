@@ -8,7 +8,10 @@ public sealed class RoomBookingManager : IRoomBookingManager
     {
         _roomBookingRepository = roomBookingRepository;
     }
-    public async Task<RoomBooking> CreateRoomBookingAsync(RoomBooking booking)
+    public async Task<RoomBooking> CreateRoomBookingAsync(
+        RoomBooking booking,
+        CancellationToken cancellationToken
+    )
     {
         if (booking.StartTime >= booking.EndTime)
         {
@@ -21,33 +24,51 @@ public sealed class RoomBookingManager : IRoomBookingManager
             booking.RoomId,
             booking.StartTime,
             booking.EndTime,
-            selectedOptionIds
+            selectedOptionIds,
+            cancellationToken
         );
     }
-    public async Task<IReadOnlyList<RoomBooking>> GetAllRoomBookingsAsync()
+    public async Task<IReadOnlyList<RoomBooking>> GetAllRoomBookingsAsync(
+        CancellationToken cancellationToken
+    )
     {
-        return await _roomBookingRepository.GetAllAsync();
+        return await _roomBookingRepository.GetAllAsync(cancellationToken);
     }
-    public async Task<RoomBooking?> GetRoomBookingByIdAsync(Guid id)
+    public async Task<RoomBooking?> GetRoomBookingByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken
+    )
     {
-        return await _roomBookingRepository.GetByIdAsync(id);
+        return await _roomBookingRepository.GetByIdAsync(id, cancellationToken);
     }
-    public async Task<bool> CancelRoomBookingAsync(Guid id)
+    public async Task<bool> CancelRoomBookingAsync(
+        Guid id,
+        CancellationToken cancellationToken
+    )
     {
-        return await _roomBookingRepository.CancelAsync(id);
+        return await _roomBookingRepository.CancelAsync(id, cancellationToken);
     }
-    public async Task<IReadOnlyList<RoomBooking>> GetByPeriodAsync(DateTime from, DateTime to)
-    {
-        ValidatePeriod(from, to);
-        return await _roomBookingRepository.GetByPeriodAsync(from, to);
-    }
-    public async Task<IReadOnlyList<RoomBooking>> GetActiveByPeriodAsync(
+    public async Task<IReadOnlyList<RoomBooking>> GetByPeriodAsync(
         DateTime from,
-        DateTime to
+        DateTime to,
+        CancellationToken cancellationToken
     )
     {
         ValidatePeriod(from, to);
-        return await _roomBookingRepository.GetActiveByPeriodAsync(from, to);
+        return await _roomBookingRepository.GetByPeriodAsync(from, to, cancellationToken);
+    }
+    public async Task<IReadOnlyList<RoomBooking>> GetActiveByPeriodAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    )
+    {
+        ValidatePeriod(from, to);
+        return await _roomBookingRepository.GetActiveByPeriodAsync(
+            from,
+            to,
+            cancellationToken
+        );
     }
     private static void ValidatePeriod(DateTime from, DateTime to)
     {

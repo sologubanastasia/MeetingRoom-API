@@ -22,11 +22,12 @@ internal static class ReportMapper
         };
     }
     public static async Task<List<PopularOptionReport>> ReadPopularOptionsAsync(
-        SqlDataReader reader
+        SqlDataReader reader,
+        CancellationToken cancellationToken
     )
     {
         var entities = new List<PopularOptionReportEntity>();
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(cancellationToken))
         {
             entities.Add(new PopularOptionReportEntity
             {
@@ -44,10 +45,13 @@ internal static class ReportMapper
             })
             .ToList();
     }
-    public static async Task<List<RoomUsageReport>> ReadRoomUsageAsync(SqlDataReader reader)
+    public static async Task<List<RoomUsageReport>> ReadRoomUsageAsync(
+        SqlDataReader reader,
+        CancellationToken cancellationToken
+    )
     {
         var entities = new List<RoomUsageReportEntity>();
-        while (await reader.ReadAsync())
+        while (await reader.ReadAsync(cancellationToken))
         {
             entities.Add(new RoomUsageReportEntity
             {

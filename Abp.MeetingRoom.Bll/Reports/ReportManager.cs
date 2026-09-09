@@ -8,26 +8,36 @@ public sealed class ReportManager : IReportManager
     {
         _reportRepository = reportRepository;
     }
-    public async Task<RevenueReport> GetRevenueReportAsync(DateTime from, DateTime to)
+    public async Task<RevenueReport> GetRevenueReportAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken
+    )
     {
         ValidatePeriod(from, to);
-        return await _reportRepository.GetRevenueAsync(from, to);
+        return await _reportRepository.GetRevenueAsync(from, to, cancellationToken);
     }
     public async Task<IReadOnlyList<PopularOptionReport>> GetPopularOptionsReportAsync(
         DateTime from,
-        DateTime to
+        DateTime to,
+        CancellationToken cancellationToken
     )
     {
         ValidatePeriod(from, to);
-        return await _reportRepository.GetPopularOptionsAsync(from, to);
+        return await _reportRepository.GetPopularOptionsAsync(
+            from,
+            to,
+            cancellationToken
+        );
     }
     public async Task<IReadOnlyList<RoomUsageReport>> GetRoomUsageReportAsync(
         DateTime from,
-        DateTime to
+        DateTime to,
+        CancellationToken cancellationToken
     )
     {
         ValidatePeriod(from, to);
-        return await _reportRepository.GetRoomUsageAsync(from, to);
+        return await _reportRepository.GetRoomUsageAsync(from, to, cancellationToken);
     }
     private static void ValidatePeriod(DateTime from, DateTime to)
     {
